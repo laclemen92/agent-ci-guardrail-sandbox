@@ -17,6 +17,8 @@ jobs:
     steps:
       - id: guard
         uses: laclemen92/agent-ci-guardrail@v0.1.1
+        with:
+          include-assisted: false
       - uses: actions/checkout@v5
       - run: node lint.mjs
 
