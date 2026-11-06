@@ -1,0 +1,35 @@
+name: CI
+on:
+  push:
+    branches: [main, "codex/**", "copilot/**", "claude/**"]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    outputs:
+      full: ${{ steps.guard.outputs.full }}
+    steps:
+      - id: guard
+        uses: laclemen92/agent-ci-guardrail@v0.1.1
+      - uses: actions/checkout@v5
+      - run: node lint.mjs
+
+  test:
+    needs: lint
+    if: needs.lint.outputs.full == 'true'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - run: node test.mjs
